@@ -1,4 +1,5 @@
 %%acquisition of the needed data from the motion capture.
+clear all;
 file = uigetfile('*.c3d');
 acq = btkReadAcquisition(file); %read the file
 markers = btkGetMarkers(acq);   %get the information of the markers in a structure
@@ -26,7 +27,7 @@ for i=3:3:num_col
     displacement_z(:,i/3)=displacement(:,i);
 end
 %%displacement histogram
-n = 12; %number of discretizations levels, this setting may have importance on the results
+n = 257; %number of discretizations levels, this setting may have importance on the results
 maximum=max(displacement);  %gives the max values for all the column hence for all the x,y,z coordinates respectively
 minimum=min(displacement);  %same for min
 %the following part get the maximum and minimums of x,y and z displacement
@@ -80,9 +81,31 @@ end
 [matrix_r_s_global_y,matrix_r_s_y,Cy,proba_r_s_y]=compute_C(histogram_y,displacement_y,discretization_y,labels);
 [matrix_r_s_global_z,matrix_r_s_z,Cz,proba_r_s_z]=compute_C(histogram_z,displacement_z,discretization_z,labels);
 
+%compute the mutual information for each dimension and sum it to get the
+%total mutual information I
 Ix=mutual_info(displacement,Cx,prob_x);
 Iy=mutual_info(displacement,Cy,prob_y);
 Iz=mutual_info(displacement,Cz,prob_z);
 I=Ix+Iy+Iz;
 
-
+%Keypose detection
+%threshold effect
+%{
+keyposes_frames=zeros(20,size(displacement,1));
+i=1;
+for threshold=1:-0.05:0.5
+    keyposes_temp=keyposes_detection(I,120,threshold)
+    keyposes_frames(i,1:size(keyposes_temp,2))=keyposes_temp
+    i=i+1;
+end
+%}
+%window effect
+threshold=linspace(0.4,1,20)
+window_size=linspace(20,200,20)
+for i=1:20
+    for j=1:20
+        keyposes_temp=keyposes_detection(I,window_size(i),threshold(j))
+        keyposes_frames(i,1:size(keyposes_temp,2))=keyposes_temp
+        test_settings.i.j=keyposes_frames(i,:)
+    end
+end
