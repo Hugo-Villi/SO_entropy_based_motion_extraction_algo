@@ -1,11 +1,13 @@
-function keyposes_frames = keyposes_detection(I,window_size,threshold)
+function [keyposes_frames,I_localized] = keyposes_detection(I,window_size,threshold)
 %Keypose detection
 %localization of mutual information to emphasize changes
 I_sliding_mean=movmean(I,window_size);  %total window size, will take the mean of (window_size) frames
 for i=1:size(I,2)
-    I_localized(i)=I(i)/I_sliding_mean(i);  
+    I_localized(i)=I(i)/I_sliding_mean(i);
 end
-
+%plot(I_localized,'DisplayName',num2str(window_size));
+%legend()
+%hold on
 %pick low minima values
 %with a threshold trimming values horizontally
 for i=1:size(I_localized,2)
@@ -14,6 +16,7 @@ for i=1:size(I_localized,2)
     else
         I_trimmed(i)=I_localized(i);    %otherwise it is not changed
     end
+    
 end
 
 %identify local through
@@ -38,7 +41,7 @@ i=1;
 j=1;
 while i<size(I_trimmed,2)-1 %to go through the whole array
     while negative_peaks(i)~=0  %will look for a 0. Finding a 0 mean that the start of the peak have benn reached
-        i=i+1;  
+        i=i+1;
         if i==size(I_trimmed,2) %if the end of the array is reached the while loops are exited
             break
         end

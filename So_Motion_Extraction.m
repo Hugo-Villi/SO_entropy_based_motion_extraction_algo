@@ -99,13 +99,27 @@ for threshold=1:-0.05:0.5
     i=i+1;
 end
 %}
+
 %window effect
-threshold=linspace(0.4,1,20)
-window_size=linspace(20,200,20)
-for i=1:20
-    for j=1:20
-        keyposes_temp=keyposes_detection(I,window_size(i),threshold(j))
-        keyposes_frames(i,1:size(keyposes_temp,2))=keyposes_temp
-        test_settings.i.j=keyposes_frames(i,:)
+steps=4;
+threshold=linspace(0.4,1,steps);
+window_size=round(linspace(20,200,steps));
+for i=1:steps
+    for j=1:steps
+        [keyposes_temp,I_localized]=keyposes_detection(I,window_size(i),threshold(j));
+        keyposes_frames(j,1:size(keyposes_temp,2))=keyposes_temp;
     end
+    name{i} = ['window_size_', num2str(window_size(i))];
+    threshold_effect.(name{i})=keyposes_frames;
+    clear keyposes_frames keyposes_temp
+    plot(I_localized,'DisplayName',num2str(window_size(i)),'LineWidth',2);
+    hold on
 end
+
+%legend()
+
+hold off
+lgd = legend;
+lgd.NumColumns = 2;
+%[frame_contact,frame_off,frame_contact2,frame_off2]=detect_event_forceplate(acq);
+%scatter_plot=scatter_3D_plot(markers_values,10);
