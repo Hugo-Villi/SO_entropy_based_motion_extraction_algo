@@ -1,5 +1,5 @@
-function Ix = mutual_info(displacement,Cx,prob_x)
-for k=1:size(displacement,1)    %go through each frame
+function Ix = mutual_info(frame_number,Cx,prob_x)
+for k=1:frame_number  %go through each frame
     sum=0;  
     for i=1:size(Cx,1)  %go through the row and column of the n*n C(r,s) matrices
         for j=1:size(Cx,2)
